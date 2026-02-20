@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoyCoin - Jogue e Ganhe</title>
+    <style>
+        :root {
+            --primary: #ffd700;
+            --secondary: #2ecc71;
+            --bg: #1a1a2e;
+            --text: #ffffff;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); text-align: center; margin: 0; padding-bottom: 50px; }
+        .header { background: #16213e; padding: 20px; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--primary); }
+        .coin-display { font-size: 24px; color: var(--primary); font-weight: bold; }
+        .container { max-width: 500px; margin: auto; padding: 20px; }
+        .card { background: #0f3460; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        /* Jogo da Velha */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 200px; margin: 10px auto; }
+        .cell { width: 60px; height: 60px; background: #16213e; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 1px solid var(--primary); }
+        
+        /* Roleta */
+        #roulette-container { position: relative; width: 200px; height: 200px; margin: auto; border: 5px solid white; border-radius: 50%; overflow: hidden; transition: transform 3s cubic-bezier(0.1, 0, 0.2, 1); }
+        .wheel-part { position: absolute; width: 100%; height: 100%; clip-path: polygon(50% 50%, 100% 0, 100% 100%); }
+        
+        /* Botões */
+        button { background: var(--secondary); border: none; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .btn-affiliate { background: #e94560; display: block; width: 100%; text-decoration: none; color: white; margin: 10px 0; padding: 10px; border-radius: 8px; font-size: 14px; }
+        .btn-buy { background: #f39c12; width: 100%; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>JoyCoin 🪙</h1>
+    <div class="coin-display">Saldo: <span id="balance">100</span> JC</div>
+</div>
+
+<div class="container">
+    
+    <div class="card">
+        <h3>💡 Motivação do Dia</h3>
+        <p id="phrase">"O sucesso é a soma de pequenos esforços repetidos dia após dia."</p>
+        <button onclick="claimIncentive()">Confirmar Leitura (+10 JC)</button>
+    </div>
+
+    <div class="card">
+        <h3>❌ Jogo da Velha ⭕</h3>
+        <div class="grid" id="tic-tac-toe">
+            <div class="cell" onclick="playTTT(0)"></div>
+            <div class="cell" onclick="playTTT(1)"></div>
+            <div class="cell" onclick="playTTT(2)"></div>
+            <div class="cell" onclick="playTTT(3)"></div>
+            <div class="cell" onclick="playTTT(4)"></div>
+            <div class="cell" onclick="playTTT(5)"></div>
+            <div class="cell" onclick="playTTT(6)"></div>
+            <div class="cell" onclick="playTTT(7)"></div>
+            <div class="cell" onclick="playTTT(8)"></div>
+        </div>
+        <p id="ttt-status">Sua vez!</p>
+    </div>
+
+    <div class="card">
+        <h3>🎡 Roleta das Cores</h3>
+        <div id="roulette-container">
+            <div class="wheel-part" style="background: red; transform: rotate(0deg);"></div>
+            <div class="wheel-part" style="background: blue; transform: rotate(90deg);"></div>
+            <div class="wheel-part" style="background: green; transform: rotate(180deg);"></div>
+            <div class="wheel-part" style="background: yellow; transform: rotate(270deg);"></div>
+        </div>
+        <p>Aposte no Verde!</p>
+        <button onclick="spinRoulette()">Girar Roleta</button>
+    </div>
+
+    <div class="card">
+        <h3>📚 Aprenda a criar jogos!</h3>
+        <p>E-book exclusivo para criar seu próprio império de games.</p>
+        <button class="btn-buy" onclick="alert('Contate: my.officen10@gmail.com para adquirir o E-book!')">COMPRAR E-BOOK AGORA</button>
+        
+        <hr>
+        <p>Apoie o projeto JoyCoin:</p>
+        <p><strong>PIX: adcmfm22@gmail.com</strong></p>
+    </div>
+
+    <div class="card">
+        <h3>🔗 Links Parceiros</h3>
+        <a href="https://ton.com.br/checkout/cart/?productId=TONSUPER_S920&referrer=1662608B-E807-46E7-BB77-62BDE5FF8EA9&userAnticipation=0&userTag=tonsuper&utm_medium=invite_share&utm_source=revendedor" class="btn-affiliate" target="_blank">Maquininha Ton (Desconto)</a>
+        <a href="https://www.meliuz.com.br/i/ref_tonygl4?ref_source=2" class="btn-affiliate" target="_blank">Ganhe com Méliuz</a>
+        <a href="https://pv.b4you.com.br/pages/251f6bd5-a6ab-440e-8bf1-b049c3403530/ORT0oybtmr" class="btn-affiliate" target="_blank">Oportunidade B4You</a>
+        <a href="https://mpago.li/2KXpcvt" class="btn-affiliate" target="_blank">Mercado Pago</a>
+    </div>
+
+    <p style="font-size: 12px;">Contato: my.officen10@gmail.com</p>
+</div>
+
+<script>
+    let coins = 100;
+    const phrases = [
+        "Não pare até se orgulhar!",
+        "A persistência é o caminho do êxito.",
+        "Sua única limitação é você mesmo.",
+        "Ganhar JoyCoins é o primeiro passo para o sucesso!"
+    ];
+
+    function updateBalance() {
+        document.getElementById('balance').innerText = coins;
+    }
+
+    // Lógica Frase
+    function claimIncentive() {
+        coins += 10;
+        updateBalance();
+        document.getElementById('phrase').innerText = phrases[Math.floor(Math.random() * phrases.length)];
+        alert("Parabéns! Você ganhou 10 JoyCoins.");
+    }
+
+    // Lógica Jogo da Velha (Simplificada)
+    let tttBoard = ["","","","","","","","",""];
+    function playTTT(index) {
+        if(tttBoard[index] === "") {
+            tttBoard[index] = "X";
+            document.getElementsByClassName('cell')[index].innerText = "X";
+            setTimeout(cpuMove, 500);
+        }
+    }
+    function cpuMove() {
+        let emptyCells = tttBoard.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+        if(emptyCells.length > 0) {
+            let move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            tttBoard[move] = "O";
+            document.getElementsByClassName('cell')[move].innerText = "O";
+        } else {
+            coins += 10;
+            updateBalance();
+            alert("Fim de jogo! Você ganhou 10 JoyCoins por participar.");
+            resetTTT();
+        }
+    }
+    function resetTTT() {
+        tttBoard = ["","","","","","","","",""];
+        Array.from(document.getElementsByClassName('cell')).forEach(c => c.innerText = "");
+    }
+
+    // Lógica Roleta
+    function spinRoulette() {
+        const wheel = document.getElementById('roulette-container');
+        const deg = Math.floor(5000 + Math.random() * 5000);
+        wheel.style.transform = `rotate(${deg}deg)`;
+        
+        setTimeout(() => {
+            coins += 10;
+            updateBalance();
+            alert("A roleta parou! Você ganhou 10 JoyCoins!");
+        }, 3500);
+    }
+</script>
+
+</body>
+</html>
+<div class="card" style="background: linear-gradient(45deg, #6a11cb, #2575fc);">
+  <h3>📢 Divulgue o JoyCoin!</h3>
+  <p>Gostou do jogo? Compartilhe com seus amigos e ajude a comunidade!</p>
+  <button onclick="shareApp()" style="background: #ffffff; color: #6a11cb; width: 100%; border-radius: 25px;">
+    📲 COMPARTILHAR NAS REDES SOCIAIS
+  </button>
+</div>
